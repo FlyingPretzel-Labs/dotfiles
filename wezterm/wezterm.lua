@@ -65,6 +65,7 @@ config.initial_cols = 150
 
 config.window_decorations = "RESIZE"
 config.enable_tab_bar = false
+config.enable_kitty_keyboard = false
 
 -- There are mouse binding to mimc Windows Terminal and let you copy
 -- To copy just highlight something and right click. Simple
@@ -109,6 +110,6 @@ config.background = {
 
 -- IMPORTANT: Sets WSL2 UBUNTU-22.04 as the defualt when opening Wezterm. Get name with wsl --list
 -- config.default_domain = 'WSL:Ubuntu-24.04'
-config.default_domain = 'WSL:FedoraLinux-42'
+config.default_domain = 'WSL:FedoraLinux-44'
 
 return config
