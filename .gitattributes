@@ -1,0 +1,4 @@
+# Store text files as LF in the repo and check them out as LF everywhere,
+# so Windows-side edits don't reintroduce CRLF churn (tmux in particular is
+# sensitive to trailing \r). Binaries are auto-detected and left untouched.
+* text=auto eol=lf
