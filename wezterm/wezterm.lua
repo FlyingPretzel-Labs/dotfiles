@@ -61,6 +61,10 @@ config.keys = {
     key = 't', mods = 'SUPER',
     action = act.SpawnCommandInNewTab { cwd = '/home/auri' },
   },
+  { -- same as Win+T, but on Ctrl+T (note: shadows readline transpose / fzf trigger)
+    key = 't', mods = 'CTRL',
+    action = act.SpawnCommandInNewTab { cwd = '/home/auri' },
+  },
   { -- AHK bridge for the binding above: Windows swallows Win+T (taskbar),
     -- so the startup AHK script translates Win+T into Ctrl+Shift+F13
     key = 'F13', mods = 'CTRL|SHIFT',
