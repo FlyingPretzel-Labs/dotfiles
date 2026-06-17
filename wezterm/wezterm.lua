@@ -75,6 +75,17 @@ config.keys = {
   },
   { key = '[', mods = 'CTRL', action = wezterm.action.EmitEvent 'opacity-dec', },
   { key = ']', mods = 'CTRL', action = wezterm.action.EmitEvent 'opacity-inc', },
+  { -- open Claude in a new tab in ~/flynns_arcade (mirrors the `claude` alias).
+    -- Absolute path + explicit cwd: WezTerm spawns without a login shell, so the
+    -- interactive `claude` alias and ~/.local/bin on PATH don't apply.
+    -- Win+Shift (not bare Win+letter): Windows reserves most Win+<letter> combos,
+    -- but Win+Shift+<letter> reaches WezTerm — same as the Super+Shift+F bind above.
+    key = 'C', mods = 'SUPER|SHIFT',
+    action = act.SpawnCommandInNewTab {
+      args = { '/home/auri/.local/bin/claude' },
+      cwd = '/home/auri/flynns_arcade',
+    },
+  },
 }
 config.initial_rows = 48
 config.initial_cols = 150
