@@ -65,6 +65,11 @@ config.keys = {
     key = 't', mods = 'CTRL',
     action = act.SpawnCommandInNewTab { cwd = '/home/auri' },
   },
+  { -- close the current tab (Ctrl+Shift+W, not plain Ctrl+W, to leave
+    -- readline's backward-kill-word alone); confirm if a process is running
+    key = 'w', mods = 'CTRL|SHIFT',
+    action = act.CloseCurrentTab { confirm = true },
+  },
   { -- AHK bridge for the binding above: Windows swallows Win+T (taskbar),
     -- so the startup AHK script translates Win+T into Ctrl+Shift+F13
     key = 'F13', mods = 'CTRL|SHIFT',
@@ -72,6 +77,9 @@ config.keys = {
   },
   { -- open the sshs host picker in a new tab (see 'new-ssh-tab' handler below)
     key = 's', mods = 'CTRL', action = wezterm.action.EmitEvent 'new-ssh-tab',
+  },
+  { -- open the mux-pick fzf grid picker in a new tab (see 'new-grid-tab' handler below)
+    key = 's', mods = 'CTRL|SHIFT', action = wezterm.action.EmitEvent 'new-grid-tab',
   },
   { key = '[', mods = 'CTRL', action = wezterm.action.EmitEvent 'opacity-dec', },
   { key = ']', mods = 'CTRL', action = wezterm.action.EmitEvent 'opacity-inc', },
@@ -86,6 +94,12 @@ config.keys = {
       cwd = '/home/auri/flynns_arcade',
     },
   },
+  -- Ctrl+Enter / Shift+Enter: emit CSI-u sequences so Hermes (prompt_toolkit)
+  -- inserts a newline instead of submitting. WezTerm otherwise collapses both
+  -- into a plain CR that Hermes can't tell apart from Enter. 13 = Enter,
+  -- modifier 5 = Ctrl, 2 = Shift (matches pt_input_extras CSI-u aliases).
+  { key = 'Enter', mods = 'CTRL',  action = act.SendString '\x1b[13;5u' },
+  { key = 'Enter', mods = 'SHIFT', action = act.SendString '\x1b[13;2u' },
 }
 config.initial_rows = 48
 config.initial_cols = 150
@@ -167,6 +181,16 @@ wezterm.on('new-ssh-tab', function(_, pane)
       '-t', 'ssh.exe {{{name}}}',
       '-e',
     },
+  }
+end)
+
+-- Ctrl+Shift+S: open the mux-pick fzf grid picker in a new tab. Run through a
+-- login shell ('bash -lc') on purpose: WezTerm spawns tabs WITHOUT a login
+-- shell, but mux-pick needs fzf (lives in /usr/sbin), tmux and ssh.exe on PATH,
+-- which only the login profile guarantees.
+wezterm.on('new-grid-tab', function(_, pane)
+  pane:window():spawn_tab {
+    args = { 'bash', '-lc', '/home/auri/bin/mux-pick.sh' },
   }
 end)
 
