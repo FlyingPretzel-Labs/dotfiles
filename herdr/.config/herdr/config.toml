@@ -1,0 +1,125 @@
+# herdr configuration — ported from ~/.tmux.conf (dotfiles/tmux/.tmux.conf)
+#
+# Schema checked against `herdr --default-config` on v0.8.2; every key below
+# exists in the binary's own dump. Only settings that DIFFER from herdr's
+# defaults are set — anything already matching tmux is noted in a comment
+# instead of restated, so this file stays a diff, not a copy of the defaults.
+#
+# Reload in place with `prefix+r` (see reload_config) or `herdr server reload-config`.
+
+[theme]
+# tmux: set -g @plugin 'catppuccin/tmux' + @catppuccin_flavor "mocha"
+# Also matches wezterm.lua's `config.color_scheme = 'Catppuccin Mocha'`.
+name = "catppuccin"
+# Deliberately NOT using auto_switch: WezTerm is hard-pinned to Catppuccin
+# Mocha, so the host terminal is always dark and there is nothing to follow.
+# To opt in later: auto_switch = true, light_name = "catppuccin-latte".
+
+[terminal]
+default_shell = "/bin/bash"
+
+# THE important one. Aliases live in ~/.bashrc.d/aliases and PATH is assembled
+# in ~/.bashrc, so a non-login shell loses `ssh` -> ssh.exe and ~/.local/bin.
+# wezterm.lua hits this exact trap twice and works around it with `bash -lc`
+# (see the new-grid-tab handler and the Win+Shift+C claude bind). "auto" only
+# uses login shells on macOS, so Linux needs this stated explicitly.
+shell_mode = "login"
+
+# new_cwd defaults to "follow" already, which is tmux's split behaviour.
+
+[keys]
+# tmux: set -g prefix C-a
+prefix = "ctrl+a"
+
+# tmux: unbind r + bind r source-file ~/.tmux.conf
+# herdr defaults reload_config to prefix+shift+r and resize_mode to prefix+r,
+# so the two are SWAPPED here rather than just overriding one — otherwise
+# resize_mode would still own prefix+r and silently win.
+reload_config = "prefix+r"
+resize_mode = "prefix+shift+r"
+
+# tmux: bind d detach-client (herdr defaults to prefix+q)
+detach = "prefix+d"
+
+# tmux: bind % split-window -h  -> side-by-side panes, vertical divider
+# tmux: bind " split-window -v  -> stacked panes, horizontal divider
+# Bound as arrays: the tmux punctuation first for muscle memory, then herdr's
+# own default as a fallback. herdr's docs warn that punctuation-with-modifiers
+# (% is shift+5, " is shift+') can be swallowed depending on the terminal, and
+# a split you cannot perform is worse than an extra binding.
+split_vertical = ["prefix+%", "prefix+v"]
+split_horizontal = ['prefix+"', "prefix+minus"]
+
+# Already identical to tmux, left at herdr's defaults — do not re-bind:
+#   new_tab        prefix+c    close_pane   prefix+x
+#   next_tab       prefix+n    zoom         prefix+z
+#   previous_tab   prefix+p    switch_tab   prefix+1..9
+#   focus_pane_*   prefix+h/j/k/l
+#
+# NOTE: prefix+e is herdr's edit_scrollback. In .tmux.conf that key is the
+# easier-reach synchronize-panes toggle (commit 58c992d) — see the unported
+# block at the bottom of this file. Left as edit_scrollback because there is
+# no sync-panes action to give it back to.
+
+# tmux: bind a display-popup -E -w 60% -h 60% "/home/auri/bin/mux-add.sh"
+# Commented out on purpose: ~/bin/mux-add.sh does not exist on this machine
+# (Fedora 44 WSL has no ~/bin, no tmux and no fzf) so the binding would only
+# ever produce an error. Uncomment on a host where the script is present.
+# [[keys.command]]
+# key = "prefix+a"
+# type = "popup"
+# command = "/home/auri/bin/mux-add.sh"
+# width = "60%"
+# height = "60%"
+
+[ui]
+# tmux: set -g mouse on — already herdr's default, stated because it is one of
+# the few tmux settings that was explicitly opted into rather than inherited.
+mouse_capture = true
+
+# tmux: set-option -g status-position top (also herdr's default).
+tab_bar_position = "top"
+
+# tmux-style splitters: a shared divider line between panes and no frame drawn
+# around the outside of the pane area. herdr's own docs describe
+# pane_outer_borders = false as "tmux-style".
+pane_outer_borders = false
+pane_gaps = false
+
+# tmux's `bind c` creates a window immediately; herdr otherwise prompts for a
+# name first. Paired with base-index/renumber-windows being unavailable, this
+# keeps new tabs as cheap as they are in tmux.
+prompt_new_tab_name = false
+
+# The sidebar is what replaces the tmux status line, so the catppuccin window
+# pill styling has nowhere to go — this is the nearest equivalent surface.
+status_indicators = "symbols"
+
+# Agent state toasts. This is the actual point of running herdr: being told the
+# moment an agent goes from working to blocked, instead of watching a pane.
+[ui.toast]
+delivery = "herdr"
+
+# Give Claude Code rows the terminal title too, so the sidebar shows what it is
+# currently doing rather than just "claude".
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+
+# ── Not ported: no herdr equivalent exists (v0.8.2) ────────────────────────
+# These are absences, not oversights.
+#
+#   bind C-a send-prefix
+#       No send-prefix action. Double-tapping ctrl+a does not emit a literal
+#       ctrl+a, so shell start-of-line is shadowed while herdr is attached.
+#
+#   bind * setw synchronize-panes
+#   bind e setw synchronize-panes
+#       herdr has no synchronize-panes. Third-party plugins broadcast one-shot
+#       commands via `herdr pane run`, but nothing mirrors live keystrokes the
+#       way tmux does. The synced-SSH-grid workflow does not port.
+#
+#   set -g base-index 1
+#       Not configurable, but moot: switch_tab is already prefix+1..9.
+#
+#   set -g renumber-windows on
+#       No equivalent; herdr tabs are named rather than numbered.
