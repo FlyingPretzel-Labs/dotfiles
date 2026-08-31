@@ -1,3 +1,4 @@
+onboarding = false
 # herdr configuration — ported from ~/.tmux.conf (dotfiles/tmux/.tmux.conf)
 #
 # Schema checked against `herdr --default-config` on v0.8.2; every key below
