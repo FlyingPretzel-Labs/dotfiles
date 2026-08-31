@@ -35,7 +35,11 @@ config.disable_default_key_bindings = true
 config.adjust_window_size_when_changing_font_size = false
 
 config.keys = {
-  -- this adds the ability to use ctrl+v to paste the system clipboard 
+  -- Ctrl+SHIFT+V pastes the system clipboard as text. Note the capital 'V':
+  -- under the default key_map_preference = "Mapped", WezTerm matches the
+  -- character produced, and a capital V requires Shift -- so this is NOT ctrl+v.
+  -- Bare Ctrl+V is deliberately left unbound so it reaches the pty: Claude Code
+  -- under WSL binds ctrl+v to chat:imagePaste and reads the clipboard itself.
   { key = 'V',
     mods = 'CTRL',
     action = act.PasteFrom 'Clipboard',
