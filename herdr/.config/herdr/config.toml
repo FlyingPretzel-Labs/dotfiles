@@ -29,8 +29,9 @@ shell_mode = "login"
 # new_cwd defaults to "follow" already, which is tmux's split behaviour.
 
 [keys]
-# tmux: set -g prefix C-a
-prefix = "ctrl+a"
+# tmux: set -g prefix C-b — tmux and herdr both default to this; Ctrl+A is left
+# to the shell (readline beginning-of-line), which is where it is used more.
+prefix = "ctrl+b"
 
 # tmux: unbind r + bind r source-file ~/.tmux.conf
 # herdr defaults reload_config to prefix+shift+r and resize_mode to prefix+r,
