@@ -74,6 +74,14 @@ split_horizontal = ['prefix+"', "prefix+minus"]
 # width = "60%"
 # height = "60%"
 
+# New tab with a fresh Claude Code session (prefix+c is a plain new tab).
+# herdr has no built-in "new agent tab" action; the script drives the herdr CLI.
+[[keys.command]]
+key = "prefix+shift+c"
+type = "shell"
+command = "/home/auri/.local/bin/herdr-claude-tab"
+description = "new Claude tab"
+
 [ui]
 # tmux: set -g mouse on — already herdr's default, stated because it is one of
 # the few tmux settings that was explicitly opted into rather than inherited.
@@ -85,8 +93,16 @@ tab_bar_position = "top"
 # tmux-style splitters: a shared divider line between panes and no frame drawn
 # around the outside of the pane area. herdr's own docs describe
 # pane_outer_borders = false as "tmux-style".
-pane_outer_borders = false
+# Outer borders back on (was false, tmux-style): Herdr draws pane labels only on a top border,
+# so without them the top row of panes in a drive shows no label. Revert: config.toml.bak-visual.
+pane_outer_borders = true
 pane_gaps = false
+
+# Blocked agents rise to the top of the sidebar.
+agent_panel_sort = "priority"
+
+# herdr-drive summary (◐ coding, × needs you, ✓ ready, ✗ fail, ⇡ landing); empty outside a drive.
+tab_bar_right = [{ type = "command", command = "/home/auri/.claude/skills/herdr-drive/scripts/hud.sh", interval_seconds = 5, timeout_seconds = 2 }]
 
 # tmux's `bind c` creates a window immediately; herdr otherwise prompts for a
 # name first. Paired with base-index/renumber-windows being unavailable, this
@@ -105,7 +121,21 @@ delivery = "herdr"
 # Give Claude Code rows the terminal title too, so the sidebar shows what it is
 # currently doing rather than just "claude".
 [ui.sidebar.agents.rows_by_agent]
-claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+# Row 1: state, pane label (w137 civitai-errors) and the herdr-drive phase in colour.
+claude = [
+  ["state_icon", { token = "pane", bold = true }, { token = "$phase", rules = [
+    { starts_with = "NEEDS", fg = "#f38ba8", bold = true },
+    { starts_with = "fail", fg = "#f38ba8" },
+    { starts_with = "ready", fg = "#a6e3a1", bold = true },
+    { starts_with = "landed", fg = "#94e2d5" },
+    { starts_with = "land", fg = "#f9e2af" },
+    { starts_with = "coding", fg = "#89b4fa" },
+    { starts_with = "rebase", fg = "#fab387" },
+    { starts_with = "driving", fg = "#cba6f7", bold = true },
+  ] }],
+  [{ token = "terminal_title_stripped", dim = true }],
+  [{ token = "agent", dim = true }, { token = "tab", dim = true }],
+]
 
 # ── Not ported: no herdr equivalent exists (v0.8.2) ────────────────────────
 # These are absences, not oversights.
@@ -125,3 +155,12 @@ claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["age
 #
 #   set -g renumber-windows on
 #       No equivalent; herdr tabs are named rather than numbered.
+
+[remote]
+# Windows OpenSSH implements neither ControlMaster/ControlPersist (open upstream
+# since 2019) nor anything that would make herdr's generated config usable: that
+# config Includes the *Linux* ~/.ssh/config, which does not exist here — the host
+# aliases live in C:\Users\MicaelDH\.ssh\config. With manage_ssh_config = false
+# herdr runs plain `ssh`, so the ssh.exe shim reads the Windows config and the
+# aliases resolve. Launch via `herdr-wsl`, not `herdr`, so the shim is on PATH.
+manage_ssh_config = false
